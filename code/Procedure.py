@@ -99,6 +99,12 @@ def Test(dataset, Recmodel, epoch, w=None, multicore=0):
         total_batch = len(users) // u_batch_size + 1
         for batch_users in utils.minibatch(users, batch_size=u_batch_size):
             allPos = dataset.getUserPosItems(batch_users)
+            # if hasattr(dataset, "_customized"):
+            #     groundTrue = [
+            #         [i for i in testDict[u] if i > 0]  # only positively-rated items
+            #         for u in batch_users
+            #     ]
+            # else:
             groundTrue = [testDict[u] for u in batch_users]
             batch_users_gpu = torch.Tensor(batch_users).long()
             batch_users_gpu = batch_users_gpu.to(world.device)
