@@ -487,12 +487,14 @@ class CustomizedLoader(BasicDataset):
             self.trainLabel,
             (self.trainUser, self.trainItem)
         ), shape=(self.n_user, self.m_item))
-        self.users_D = np.array(self.UserItemNet.sum(axis=1)).squeeze()
+        self.users_D = np.array(abs(self.UserItemNet).sum(axis=1)).squeeze()
         self.users_D[self.users_D == 0.] = 1
-        self.items_D = np.array(self.UserItemNet.sum(axis=0)).squeeze()
+        self.items_D = np.array(abs(self.UserItemNet).sum(axis=0)).squeeze()
         self.items_D[self.items_D == 0.] = 1.
         # pre-calculate
         self._allPos = self.getUserPosItems(list(range(self.n_user)))
+        if world.observed_only:
+            self._allNeg = self.getUserNegItems(list(range(self.n_user)))
         self.__testDict = self.__build_test()
         print(f"{world.dataset} is ready to go")
 
@@ -515,6 +517,10 @@ class CustomizedLoader(BasicDataset):
     @property
     def allPos(self):
         return self._allPos
+
+    @property
+    def allNeg(self):
+        return self._allNeg
 
     def _split_A_hat(self, A):
         A_fold = []
@@ -607,11 +613,31 @@ class CustomizedLoader(BasicDataset):
         return np.array(self.UserItemNet[users, items]).astype('uint8').reshape((-1,))
 
     def getUserPosItems(self, users):
-        posItems = []
+        if not world.observed_only:
+            posItems = []
+            for user in users:
+                indices = self.UserItemNet[user].nonzero()[1]
+                start = self.UserItemNet.indptr[user]
+                end = self.UserItemNet.indptr[user+1]
+                indicators = self.UserItemNet.data[start:end]
+                posItems.append(indicators*indices)
+            return posItems
+        else:
+            posItems = []
+            for user in users:
+                indices = self.UserItemNet[user].nonzero()[1]
+                start = self.UserItemNet.indptr[user]
+                end = self.UserItemNet.indptr[user+1]
+                indicators = self.UserItemNet.data[start:end]
+                posItems.append(indices[indicators>0])
+            return posItems
+
+    def getUserNegItems(self, users):
+        negItems = []
         for user in users:
             indices = self.UserItemNet[user].nonzero()[1]
             start = self.UserItemNet.indptr[user]
-            end = self.UserItemNet.indptr[user+1]
+            end = self.UserItemNet.indptr[user + 1]
             indicators = self.UserItemNet.data[start:end]
-            posItems.append(indicators*indices)
-        return posItems
+            negItems.append(indices[indicators < 0])
+        return negItems

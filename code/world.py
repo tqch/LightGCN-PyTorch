@@ -16,7 +16,7 @@ import multiprocessing
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 args = parse_args()
 
-ROOT_PATH = os.path.expanduser("~/PycharmProjects/ECE 380L/LightGCN-PyTorch")
+ROOT_PATH = os.path.expanduser("~/Projects/LightGCN-PyTorch")
 CODE_PATH = join(ROOT_PATH, 'code')
 DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
@@ -60,7 +60,7 @@ if model_name not in all_models:
     raise NotImplementedError(f"Haven't supported {model_name} yet!, try {all_models}")
 
 
-
+observed_only = args.observed_only
 
 TRAIN_epochs = args.epochs
 LOAD = args.load

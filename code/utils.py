@@ -77,9 +77,12 @@ def UniformSample_original_python(dataset):
     user_num = dataset.trainDataSize
     users = np.random.randint(0, dataset.n_users, user_num)
     allPos = dataset.allPos
+    if world.observed_only:
+        allNeg = dataset.allNeg
     S = []
     sample_time1 = 0.
     sample_time2 = 0.
+
     for i, user in enumerate(users):
         start = time()
         posForUser = allPos[user]
@@ -87,13 +90,24 @@ def UniformSample_original_python(dataset):
             continue
         sample_time2 += time() - start
 
-        if False:
-        # if hasattr(dataset, "_customized"):
-            posindex = np.random.randint(0, sum(posForUser > 0))
-            positem = posForUser[posForUser > 0][posindex]
-            if sum(posForUser <= 0):
-                negindex = np.random.randint(0, sum(posForUser <= 0))
-                negitem = -posForUser[posForUser <= 0][negindex]
+        posindex = np.random.randint(0, len(posForUser))
+        positem = posForUser[posindex]
+
+        if hasattr(dataset, "_customized"):
+            if world.observed_only:
+                negForUser = allNeg[user]
+                if len(negForUser):
+                    negindex = np.random.randint(0, len(negForUser))
+                    negitem = negForUser[negindex]
+                else:
+                    # none negative examples
+                    # sample out of observation item instead
+                    while True:
+                        negitem = np.random.randint(0, dataset.m_items)
+                        if negitem in np.concatenate([posForUser, negForUser]):
+                            continue
+                        else:
+                            break
             else:
                 while True:
                     negitem = np.random.randint(0, dataset.m_items)
@@ -101,18 +115,17 @@ def UniformSample_original_python(dataset):
                         continue
                     else:
                         break
+                if positem <= 0:
+                    positem, negitem = negitem, -positem
         else:
-            posindex = np.random.randint(0, len(posForUser))
-            positem = abs(posForUser[posindex])
+            positem = abs(positem)
             while True:
                 negitem = np.random.randint(0, dataset.m_items)
                 if negitem in posForUser:
                     continue
                 else:
                     break
-        if hasattr(dataset, "_customized"):
-            if positem <= 0:
-                positem, negitem = negitem, -positem
+
         S.append([user, positem, negitem])
         end = time()
         sample_time1 += end - start

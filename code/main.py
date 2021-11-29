@@ -30,12 +30,13 @@ Neg_k = 1
 
 # init tensorboard
 if world.tensorboard:
-    w : SummaryWriter = SummaryWriter(
-                                    join(world.BOARD_PATH, time.strftime("%m-%d-%Hh%Mm%Ss-") + "-" + world.comment)
-                                    )
+    w : SummaryWriter = SummaryWriter(join(
+        world.BOARD_PATH,
+        time.strftime("%m-%d-%Hh%Mm%Ss-") + "-" + world.comment
+    ))
 else:
     w = None
-    world.cprint("not enable tensorflowboard")
+    world.cprint("not enable tensorboard")
 
 try:
     for epoch in range(world.TRAIN_epochs):
