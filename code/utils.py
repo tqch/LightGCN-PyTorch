@@ -109,14 +109,22 @@ def UniformSample_original_python(dataset):
                         else:
                             break
             else:
-                while True:
-                    negitem = np.random.randint(0, dataset.m_items)
-                    if negitem in np.abs(posForUser):
-                        continue
-                    else:
-                        break
                 if positem <= 0:
+                    while True:
+                        negitem = np.random.randint(0, dataset.m_items)
+                        if negitem in -posForUser[posForUser<=0]:
+                            continue
+                        else:
+                            break
                     positem, negitem = negitem, -positem
+                else:
+                    while True:
+                        negitem = np.random.randint(0, dataset.m_items)
+                        if negitem in posForUser[posForUser>0]:
+                            continue
+                        else:
+                            break
+
         else:
             positem = abs(positem)
             while True:

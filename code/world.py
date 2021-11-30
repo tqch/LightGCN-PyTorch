@@ -16,7 +16,7 @@ import multiprocessing
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 args = parse_args()
 
-ROOT_PATH = os.path.expanduser("~/Projects/LightGCN-PyTorch")
+ROOT_PATH = os.path.expanduser("~/PycharmProjects/ECE 380L/LightGCN-PyTorch")
 CODE_PATH = join(ROOT_PATH, 'code')
 DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
